@@ -40,8 +40,9 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
     private let _shouldScale: Bool
     private let _verticalAlignment: VerticalAlignment
     private let _sensitivity: ACarouselSensitivity
+    private let _dragAnimation: Animation?
     
-    init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity) {
+    init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity, dragAnimation: Animation?) {
         
         guard index.wrappedValue < data.count else {
             fatalError("The index should be less than the count of data ")
@@ -59,6 +60,7 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
         self._verticalAlignment = verticalAlignment
         self._shouldScale = shouldScale
         self._sensitivity = sensitivity
+        self._dragAnimation = dragAnimation
         
         if data.count > 1 && isWrap {
             activeIndex = index.wrappedValue + 1
@@ -113,8 +115,8 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
 @available(iOS 14.0, OSX 11.0, *)
 extension ACarouselViewModel where ID == Data.Element.ID, Data.Element : Identifiable {
     
-    convenience init(_ data: Data, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity) {
-        self.init(data, id: \.id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScale, sensitivity: sensitivity)
+    convenience init(_ data: Data, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity, dragAnimation: Animation?) {
+        self.init(data, id: \.id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScale, sensitivity: sensitivity, dragAnimation: dragAnimation)
     }
 }
 
@@ -160,9 +162,9 @@ extension ACarouselViewModel {
     
     var offsetAnimation: Animation? {
         guard isWrap else {
-            return .spring()
+            return _dragAnimation ?? .spring()
         }
-        return isAnimatedOffset ? .spring() : .none
+        return isAnimatedOffset ? (_dragAnimation ?? .spring()) : .none
     }
     
     var itemWidth: CGFloat {
