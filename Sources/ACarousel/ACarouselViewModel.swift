@@ -39,8 +39,9 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
     private let _useLazyHStack: Bool
     private let _shouldScale: Bool
     private let _verticalAlignment: VerticalAlignment
+    private let _sensitivity: ACarouselSensitivity
     
-    init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool) {
+    init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity) {
         
         guard index.wrappedValue < data.count else {
             fatalError("The index should be less than the count of data ")
@@ -57,6 +58,7 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
         self._canMove = canMove
         self._verticalAlignment = verticalAlignment
         self._shouldScale = shouldScale
+        self._sensitivity = sensitivity
         
         if data.count > 1 && isWrap {
             activeIndex = index.wrappedValue + 1
@@ -111,8 +113,8 @@ class ACarouselViewModel<Data, ID>: ObservableObject where Data : RandomAccessCo
 @available(iOS 14.0, OSX 11.0, *)
 extension ACarouselViewModel where ID == Data.Element.ID, Data.Element : Identifiable {
     
-    convenience init(_ data: Data, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool) {
-        self.init(data, id: \.id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScale)
+    convenience init(_ data: Data, index: Binding<Int>, spacing: CGFloat, headspace: CGFloat, sidesScaling: CGFloat, isWrap: Bool, autoScroll: ACarouselAutoScroll, canMove: Bool, useLazyHStack: Bool, verticalAlignment: VerticalAlignment, shouldScale: Bool, sensitivity: ACarouselSensitivity) {
+        self.init(data, id: \.id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScale, sensitivity: sensitivity)
     }
 }
 
@@ -150,6 +152,10 @@ extension ACarouselViewModel {
     
     var shouldScale: Bool {
         return _shouldScale
+    }
+    
+    var sensitivity: ACarouselSensitivity {
+        return _sensitivity
     }
     
     var offsetAnimation: Animation? {
@@ -293,7 +299,12 @@ extension ACarouselViewModel {
         /// At the end of the drag, if the drag value exceeds the drag threshold,
         /// the active view will be toggled
         /// default is one third of subview
-        let dragThreshold: CGFloat = itemWidth / 3
+        let dragThreshold: CGFloat
+        
+        switch sensitivity {
+        case .custom(let value):
+            dragThreshold = itemWidth / value
+        }
         
         var activeIndex = self.activeIndex
         if value.translation.width > dragThreshold {

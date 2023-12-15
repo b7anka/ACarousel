@@ -27,6 +27,17 @@ public enum ACarouselAutoScroll {
 }
 
 @available(iOS 14.0, OSX 11.0, *)
+public enum ACarouselSensitivity {
+    
+    case custom(value: CGFloat)
+    
+    static public var standard: ACarouselSensitivity = .custom(value: 3)
+    static public var low: ACarouselSensitivity = .custom(value: 8)
+    static public var high: ACarouselSensitivity = .custom(value: 1)
+    
+}
+
+@available(iOS 14.0, OSX 11.0, *)
 extension ACarouselAutoScroll {
     
     /// default active
