@@ -57,11 +57,17 @@ public struct ACarousel<Data, ID, Content> : View where Data : RandomAccessColle
     
     private var mainContent: some View {
         ForEach(viewModel.data, id: viewModel.dataId) {
-            content($0)
-                .frame(width: viewModel.itemWidth)
-                .scaleEffect(x: 1, y: viewModel.itemScaling($0), anchor: .center)
+            if viewModel.shouldScale {
+                content($0)
+                    .frame(width: viewModel.itemWidth)
+            } else {
+                content($0)
+                    .frame(width: viewModel.itemWidth)
+                    .scaleEffect(x: 1, y: viewModel.itemScaling($0), anchor: .center)
+            }
         }
     }
+    
 }
 
 
@@ -86,9 +92,9 @@ extension ACarousel {
     ///   - autoScroll: A enum that define view to scroll automatically. See
     ///     ``ACarouselAutoScroll``. default is `inactive`.
     ///   - content: The view builder that creates views dynamically.
-    public init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int> = .constant(0), spacing: CGFloat = 10, headspace: CGFloat = 10, sidesScaling: CGFloat = 0.8, isWrap: Bool = false, autoScroll: ACarouselAutoScroll = .inactive, canMove: Bool = true, useLazyHStack: Bool = false, verticalAlignment: VerticalAlignment = .center, @ViewBuilder content: @escaping (Data.Element) -> Content) {
+    public init(_ data: Data, id: KeyPath<Data.Element, ID>, index: Binding<Int> = .constant(0), spacing: CGFloat = 10, headspace: CGFloat = 10, sidesScaling: CGFloat = 0.8, isWrap: Bool = false, autoScroll: ACarouselAutoScroll = .inactive, canMove: Bool = true, useLazyHStack: Bool = false, verticalAlignment: VerticalAlignment = .center, shouldScaled: Bool = true, @ViewBuilder content: @escaping (Data.Element) -> Content) {
         
-        self.viewModel = ACarouselViewModel(data, id: id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment)
+        self.viewModel = ACarouselViewModel(data, id: id, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScaled)
         self.content = content
     }
     
@@ -112,9 +118,9 @@ extension ACarousel where ID == Data.Element.ID, Data.Element : Identifiable {
     ///   - autoScroll: A enum that define view to scroll automatically. See
     ///     ``ACarouselAutoScroll``. default is `inactive`.
     ///   - content: The view builder that creates views dynamically.
-    public init(_ data: Data, index: Binding<Int> = .constant(0), spacing: CGFloat = 10, headspace: CGFloat = 10, sidesScaling: CGFloat = 0.8, isWrap: Bool = false, autoScroll: ACarouselAutoScroll = .inactive, canMove: Bool = true, useLazyHStack: Bool = false, verticalAlignment: VerticalAlignment = .center, @ViewBuilder content: @escaping (Data.Element) -> Content) {
+    public init(_ data: Data, index: Binding<Int> = .constant(0), spacing: CGFloat = 10, headspace: CGFloat = 10, sidesScaling: CGFloat = 0.8, isWrap: Bool = false, autoScroll: ACarouselAutoScroll = .inactive, canMove: Bool = true, useLazyHStack: Bool = false, verticalAlignment: VerticalAlignment = .center, shouldScaled: Bool = true, @ViewBuilder content: @escaping (Data.Element) -> Content) {
         
-        self.viewModel = ACarouselViewModel(data, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment)
+        self.viewModel = ACarouselViewModel(data, index: index, spacing: spacing, headspace: headspace, sidesScaling: sidesScaling, isWrap: isWrap, autoScroll: autoScroll, canMove: canMove, useLazyHStack: useLazyHStack, verticalAlignment: verticalAlignment, shouldScale: shouldScaled)
         self.content = content
     }
     
